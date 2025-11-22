@@ -1,7 +1,9 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import useAuth from "../../../hooks/useAuth";
-import { FcGoogle } from "react-icons/fc";
+import { Link, useLocation, useNavigate } from "react-router";
+import SocialLogin from "../SocialLogin/SocialLogin";
+import axios from "axios";
 
 const Register = () => {
   const {
@@ -10,16 +12,52 @@ const Register = () => {
     formState: { errors },
   } = useForm();
 
-  const { registerUser } = useAuth();
+  const { registerUser, updateUserProfile } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  console.log('from register', location)
 
   const handleRegistration = (data) => {
+    console.log('after register', data.photo[0])
+    const profileImg = data.photo[0];
+
     registerUser(data.email, data.password)
-      .then(result => console.log(result.user))
-      .catch(error => console.log(error.code));
+      .then(result => {
+        console.log(result.user)
+        // 1. store the image and get the photoURL
+        const formData = new FormData();
+        formData.append('image', profileImg)
+
+        // 2. send the photo to store and get the url
+        const image_API_URL = `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_imgHost}`
+
+        axios.post(image_API_URL, formData)
+            .then(res => {
+                console.log('after image upload', res.data.data.url)
+
+                // update user profile to firebase
+                const userProfile = {
+                    displayName: data.name,
+                    photoURL: res.data.data.url
+                }
+
+                updateUserProfile(userProfile)
+                    .then(result => {
+                        console.log('user profile updated done', result)
+                        navigate(location.state || '/');
+                    })
+                    .catch(error => {
+                        console.log(error)
+                    })
+            })
+      })
+      .catch(error => {
+        console.log(error.code)
+      });
   };
 
   return (
-    <div className="max-w-md w-full mx-auto">
+    <div className="max-w-md w-full mx-auto p-10">
 
       {/* Heading */}
       <div className="mb-8">
@@ -28,8 +66,7 @@ const Register = () => {
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit(handleRegistration)} className="space-y-4">
-
+      <form onSubmit={handleSubmit(handleRegistration)} className="space-y-3">
         {/* Name */}
         <div>
           <label className="block text-sm font-medium mb-1">Name</label>
@@ -41,6 +78,19 @@ const Register = () => {
           />
           {errors.name && <p className="text-red-500 text-sm">Name is required</p>}
         </div>
+
+        {/* Photo Image */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Photo</label>
+          <input
+            type="file"
+            {...register("photo", { required: true })}
+            className="file-input input-bordered w-full"
+            placeholder="Photo"
+          />
+          {errors.name && <p className="text-red-500 text-sm">Photo is required</p>}
+        </div>
+
 
         {/* Email */}
         <div>
@@ -90,21 +140,18 @@ const Register = () => {
       {/* Login Link */}
       <p className="text-center mt-3 text-sm">
         Already have an account?{" "}
-        <a className="font-semibold link link-hover">Login</a>
+        <Link to="/login" state={location.state} className="font-semibold link link-hover">Login</Link>
       </p>
 
       {/* Divider */}
-      <div className="flex items-center gap-3 my-4">
+      <div className="flex items-center gap-3 my-3">
         <div className="flex-1 h-px bg-gray-300"></div>
         <span className="text-gray-500 text-sm">Or</span>
         <div className="flex-1 h-px bg-gray-300"></div>
       </div>
 
       {/* Google Login */}
-      <button className="btn w-full bg-gray-100 border border-gray-300 flex items-center gap-2">
-        <FcGoogle size={22} />
-        Register with Google
-      </button>
+      <SocialLogin></SocialLogin>
     </div>
   );
 };

@@ -1,9 +1,22 @@
 import React from "react";
 import Logo from "../../../components/Logo/Logo";
-import { NavLink } from "react-router";
+import { Link, NavLink } from "react-router";
 import { LuArrowUpRight } from "react-icons/lu";
+import useAuth from "../../../hooks/useAuth";
 
 const Navbar = () => {
+  const { user, logOut } = useAuth();
+
+  const handleLogOut = () => {
+    logOut()
+      .then((result) => {
+        console.log(result.user);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   const links = (
     <nav className="flex">
       <li>
@@ -16,7 +29,7 @@ const Navbar = () => {
         <NavLink to="services">About Us</NavLink>
       </li>
       <li>
-        <NavLink to="services">Pricing</NavLink>
+        <NavLink to="send-parcel">Send Parcel</NavLink>
       </li>
       <li>
         <NavLink to="services">Blog</NavLink>
@@ -52,9 +65,7 @@ const Navbar = () => {
             tabIndex="-1"
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
           >
-            {
-                links
-            }
+            {links}
           </ul>
         </div>
         <a className="btn btn-ghost text-xl">
@@ -62,17 +73,39 @@ const Navbar = () => {
         </a>
       </div>
       <div className="navbar-center hidden lg:flex">
-        <ul className="menu menu-horizontal px-1">
-          {
-            links
-          }
-        </ul>
+        <ul className="menu menu-horizontal px-1">{links}</ul>
       </div>
       <div className="navbar-end gap-3">
-        <a className="btn rounded-lg">Sign In</a>
-        <a className="btn bg-primary rounded-lg">Sign Up</a>
-        <div className="h-10 w-10 flex items-center justify-center text-primary bg-[#1f1f1f] rounded-full">
+        {user ? (
+          <a
+            onClick={handleLogOut}
+            className="btn hover:btn-primary text-black rounded-lg"
+          >
+            Log Out
+          </a>
+        ) : (
+          <div className="flex gap-2 text-primary ">
+            <Link to="/login" className="btn bg-primary rounded-lg">
+              Login
+            </Link>
+            <Link
+              to="/login"
+              className="bg-[#1f1f1f] text-primary h-10 w-10 flex items-center justify-center rounded-full"
+            >
+              <LuArrowUpRight size={25} />
+            </Link>
+          </div>
+        )}
+        <div className="flex gap-2">
+          <Link to="/rider" className="btn btn-primary text-black rounded-lg">
+            Be a Rider
+          </Link>
+          <Link
+            to="/rider"
+            className="bg-[#1f1f1f] text-primary h-10 w-10 flex items-center justify-center rounded-full"
+          >
             <LuArrowUpRight size={25} />
+          </Link>
         </div>
       </div>
     </div>
