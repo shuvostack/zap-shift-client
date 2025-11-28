@@ -20,23 +20,24 @@ const Navbar = () => {
   const links = (
     <nav className="flex">
       <li>
-        <NavLink to="services">Services</NavLink>
+        <NavLink to="">Services</NavLink>
+      </li>
+      <li>
+        <NavLink to="">About Us</NavLink>
+      </li>
+      <li>
+        <NavLink to="/send-parcel">Send Parcel</NavLink>
       </li>
       <li>
         <NavLink to="/coverage">Coverage</NavLink>
       </li>
-      <li>
-        <NavLink to="services">About Us</NavLink>
-      </li>
-      <li>
-        <NavLink to="send-parcel">Send Parcel</NavLink>
-      </li>
-      <li>
-        <NavLink to="services">Blog</NavLink>
-      </li>
-      <li>
-        <NavLink to="services">Contact</NavLink>
-      </li>
+      {user && (
+        <>
+          <li>
+            <NavLink to="/dashboard/my-parcels">My Parcels</NavLink>
+          </li>
+        </>
+      )}
     </nav>
   );
 
@@ -79,21 +80,21 @@ const Navbar = () => {
         {user ? (
           <a
             onClick={handleLogOut}
-            className="btn hover:btn-primary text-black rounded-lg"
+            className="btn hover:btn-secondary hover:text-white text-black rounded-lg"
           >
             Log Out
           </a>
         ) : (
           <div className="flex gap-2 text-primary ">
-            <Link to="/login" className="btn bg-primary rounded-lg">
+            <Link to="/login" className="btn hover:btn-secondary rounded-lg">
               Login
             </Link>
-            <Link
+            {/* <Link
               to="/login"
               className="bg-[#1f1f1f] text-primary h-10 w-10 flex items-center justify-center rounded-full"
             >
               <LuArrowUpRight size={25} />
-            </Link>
+            </Link> */}
           </div>
         )}
         <div className="flex gap-2">
